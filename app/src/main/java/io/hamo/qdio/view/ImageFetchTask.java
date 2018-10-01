@@ -10,12 +10,6 @@ import java.io.InputStream;
 
 public class ImageFetchTask extends AsyncTask<String, Void, Bitmap> {
 
-    ImageView bmImage;
-
-    public ImageFetchTask(ImageView bmImage) {
-        this.bmImage = bmImage;
-    }
-    //TODO ska ej ta in imageView ska istället retunera bitmap
     protected Bitmap doInBackground(String... urls) {
         String urldisplay = urls[0];
         Bitmap mIcon11 = null;
@@ -27,9 +21,5 @@ public class ImageFetchTask extends AsyncTask<String, Void, Bitmap> {
             e.printStackTrace();
         }
         return mIcon11;
-    }
-
-    protected void onPostExecute(Bitmap result) {
-        bmImage.setImageBitmap(result);
     }
 }
