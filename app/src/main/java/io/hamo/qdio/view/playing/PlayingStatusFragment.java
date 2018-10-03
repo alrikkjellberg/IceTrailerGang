@@ -11,7 +11,9 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import io.hamo.qdio.R;
@@ -24,6 +26,8 @@ public class PlayingStatusFragment extends Fragment {
     private TextView trackName;
     private ImageView albumImage;
     private TextView artistName;
+    private SeekBar seekBar;
+    private ImageButton playPauseBtn;
 
     @Override
     public void onAttach(Context context) {
@@ -34,6 +38,14 @@ public class PlayingStatusFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new PlayingStatusViewModel();
+
+        viewModel.getCurrentPosition().observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long aLong) {
+                seekBar.setProgress(aLong.intValue());
+
+            }
+        });
 
         viewModel.getCurrentlyPlayingTrack().observe(this, new Observer<Track>() {
             @Override
@@ -46,7 +58,19 @@ public class PlayingStatusFragment extends Fragment {
                     sb.append(a.getName());
                 }
                 artistName.setText(sb.toString());
+                seekBar.setMax((int) track.getDurationMs());
+            }
+        });
 
+        viewModel.getIsPlaying().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean) {
+                if (aBoolean){
+                    playPauseBtn.setImageResource(android.R.drawable.ic_media_pause);
+                }
+                else {
+                    playPauseBtn.setImageResource(android.R.drawable.ic_media_play);
+                }
             }
         });
 
@@ -63,7 +87,6 @@ public class PlayingStatusFragment extends Fragment {
                 albumImage.setImageBitmap(bitmap);
             }
         });
-
     }
 
     @Nullable
@@ -73,6 +96,20 @@ public class PlayingStatusFragment extends Fragment {
         trackName = (TextView)view.findViewById(R.id.trackName);
         artistName = (TextView)view.findViewById(R.id.artistName);
         albumImage = (ImageView) view.findViewById(R.id.albumImage);
+        seekBar = (SeekBar) view.findViewById(R.id.seekBar);
+        playPauseBtn = (ImageButton) view.findViewById(R.id.playPauseBtn);
+        playPauseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewModel.playBtnClicked();
+            }
+        });
+        if (!viewModel.getIsMasterRoom()){
+            View buttonContainer = view.findViewById(R.id.buttonContainer);
+            buttonContainer.setVisibility(View.GONE);
+            seekBar.setVisibility(View.GONE);
+        }
+
         return view;
 
     }
